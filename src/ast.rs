@@ -1,6 +1,7 @@
 use std::boxed;
+use std::iter;
 
-use crate::lexer::*;
+use crate::lexer::{self, *};
 
 #[derive(Debug, PartialEq)]
 pub enum ExprAST {
@@ -27,7 +28,35 @@ pub struct FunctionAST(pub PrototypeAST, pub ExprAST);
 type ParseResult<T> = Result<T, String>;
 
 fn parse(input: &str) -> ParseResult<ExprAST> {
-    todo!()
+    let tokens: Vec<Token> = lexer::gettok(input);
+    match parse_rec(tokens.into_iter(), None) {
+        Some(s) => Ok(s),
+        None => Err("IDK".into()),
+    }
+}
+// This might not need to be an option
+fn parse_rec(input: impl Iterator<Item = Token>, cur_ast: Option<ExprAST>) -> Option<ExprAST> {
+    let next_token: Token = match input.next() {
+        None => return cur_ast,
+        Some(t) => t,
+    };
+    match next_token {
+        Token::Eof => cur_ast,
+        Token::Def => FunctionAST(proto_parse(till_body), parse_rec(till_end, cur_ast)),
+        Token::Extern => {}
+        Token::Identifier(ident) => {}
+        Token::Number(num) => {}
+        Token::Char(c) => {}
+        Token::If => {}
+        Token::Then => {}
+        Token::Else => {}
+        Token::For => {
+            todo!()
+        }
+        Token::In => {
+            todo!()
+        }
+    };
 }
 fn parse_def(input: &str) -> ParseResult<FunctionAST> {
     todo!()
@@ -123,7 +152,7 @@ fn parse_function() {
     assert_eq!(
         parse_def("def add(a,b) a + b"),
         Ok(FunctionAST(
-            PrototypeAST("foo".into(), vec!["a".into(), "b".into()]),
+            PrototypeAST("add".into(), vec!["a".into(), "b".into()]),
             fun_body
         ))
     );
